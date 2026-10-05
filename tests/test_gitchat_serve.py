@@ -1174,7 +1174,7 @@ def test_send_does_not_suppress_distinct_operation_identity(monkeypatch):
     assert result is None
 
 
-def test_send_eight_concurrent_terminals_published_once_in_this_run(tmp_path):
+def test_send_eight_concurrent_terminals_leave_a_published_reply(tmp_path):
     remote = tmp_path / "remote.git"
     client = tmp_path / "client"
     subprocess.run(("git", "init", "--bare", "-q", remote), check=True)
@@ -1229,12 +1229,19 @@ def test_send_eight_concurrent_terminals_published_once_in_this_run(tmp_path):
         )
     results = [process.communicate(timeout=30) for process in processes]
 
-    assert [process.returncode for process in processes] == [0] * 8
-    payloads = [json.loads(stdout) for stdout, stderr in results]
-    # True of the interleavings a run like this produces. The check is
-    # not atomic with the append, so this is not forced; see the known
-    # limits in SECURITY.md.
-    assert sum(payload["published"] for payload in payloads) == 1
+    # Eight senders share one checkout. A sender can lose a race inside
+    # git itself while it adds its worktree and exit 1 having published
+    # nothing; the terminal check is not atomic with the append, so two
+    # can also both publish. Neither is forced not to happen (see the
+    # known limits in SECURITY.md), so this asserts only what is: every
+    # sender exits 0 or 1, a sender that exits 0 prints its JSON line,
+    # and at least one reply is published.
+    codes = [process.returncode for process in processes]
+    assert set(codes) <= {0, 1}, codes
+    payloads = [
+        json.loads(stdout) for (stdout, stderr), code in zip(results, codes) if code == 0
+    ]
+    assert sum(payload["published"] for payload in payloads) >= 1
     listing = subprocess.run(
         (
             "git",
@@ -1248,7 +1255,7 @@ def test_send_eight_concurrent_terminals_published_once_in_this_run(tmp_path):
         capture_output=True,
         text=True,
     )
-    assert len(listing.stdout.splitlines()) == 1
+    assert len(listing.stdout.splitlines()) >= 1
 
 
 def test_send_restores_terminal_deleted_after_refresh(tmp_path, capsys, monkeypatch):

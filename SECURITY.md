@@ -232,9 +232,14 @@ were written for cooperating peers.
 - The check that stops a second terminal reply is not atomic
   with the append. Two `gitchat_send.py` processes in one
   checkout that interleave between the check and the
-  worktree creation can both publish a terminal reply. The
-  test that runs eight senders at once does not force that
-  interleaving.
+  worktree creation can both publish a terminal reply.
+- Concurrent `gitchat_send.py` processes in one checkout can
+  collide inside `git worktree add`. A sender that loses
+  exits 1 with "could not create an orphan outbox worktree"
+  and publishes nothing; the caller must send again. The
+  test that runs eight senders at once forces neither case
+  and asserts only that every sender exits 0 or 1 and that
+  at least one reply is published.
 - A `SIGINT` or `SIGTERM` that arrives while a worker runs is
   acted on only after the worker finishes or times out
   (`--worker-timeout`, one hour by default).
