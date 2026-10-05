@@ -99,24 +99,24 @@ slug-neutral.
 ## Reply wait behavior
 
 - When a send-style invocation waits for a peer terminal
-  response, poll the recipient outbox in the foreground.
-- Print a single `.` about every 3 seconds while waiting so
-  the human sees live progress.
-- As soon as the matching terminal response arrives, stop
-  the dots and print the stamp line, the `msg`, and the two
-  footer lines, each block separated by one blank line.
-- Time out after 60 seconds total for a non-streamed send.
-  On timeout, print one short line such as
-  `no reply within 60s`, then stop.
-- For a streamed send (`stream:true`), do not stop at the
-  first message. Tail the conversation: render each
-  `progress` envelope in `seq` order as it arrives, then the
-  terminal `response`/`error` ends the thread. Use an idle
-  timeout of about 120 seconds, reset on every new progress
-  or terminal message, plus a hard cap of about 30 minutes.
-  The bundled `scripts/gitchat_tail.py` performs
-  this tail without writing to the remote, within the limits
-  under "Tail helper".
+  response, run the bundled tail in the foreground; it
+  writes nothing to the remote:
+  `gitchat_tail.py --conversation <id> --repo <path>
+  --idle-timeout 120 --hard-cap 1800 --poll-interval 5`
+  (these values are its defaults).
+- It fetches every `--poll-interval` seconds and prints
+  nothing while waiting; there are no progress dots.
+- When the matching terminal response arrives, it prints the
+  stamp line, the `msg`, and the two footer lines (see
+  Display) and exits 0.
+- It stops after `--idle-timeout` seconds with no new
+  message (exit 3) or `--hard-cap` seconds in total (exit 2),
+  printing one `[gitchat-tail]` line to standard error. Pass
+  smaller values for a shorter wait.
+- For a streamed send (`stream:true`), the same command
+  renders each `progress` envelope in `seq` order as it
+  arrives, resetting the idle timeout, until the terminal
+  `response`/`error`. See "Tail helper" for its limits.
 
 ## Display
 
@@ -132,6 +132,10 @@ slug-neutral.
     `[gitchat(<sender> -> <recipient> -> <sender>): <round-trip>]`
   - Always print both footer lines so they delimit the
     reply.
+- `gitchat_serve.py` publishes the worker's output (stdout or
+  `{out_file}`) verbatim as `msg`, trailing newline included,
+  so output ending in a newline renders an extra blank line
+  before footer 1; a worker should not end it with a newline.
 - `<time>` is the terminal envelope's `created_at` rendered
   as `hh:mm:ss AM/PM on Ddd, Mon D` in the receiving agent's
   local timezone when known, else UTC with ` UTC` appended.
@@ -450,7 +454,8 @@ the send script generates are unaffected.
 
 ```
 gitchat_tail.py --conversation <id> --repo <path> \
-  [--remote origin] [--message-dir .agents/gitchat/messages/]
+  [--remote origin] [--message-dir .agents/gitchat/messages/] \
+  [--idle-timeout 120] [--hard-cap 1800] [--poll-interval 5]
 ```
 
 ## Log-streaming bridge
