@@ -107,12 +107,12 @@ slug-neutral.
 - It fetches every `--poll-interval` seconds and prints
   nothing while waiting; there are no progress dots.
 - When the matching terminal response arrives, it prints the
-  stamp line, the `msg`, and the two footer lines (see
-  Display) and exits 0.
+  stamp line (its `<time>` always in UTC), the `msg`, and the
+  two footer lines (see Display) and exits 0.
 - It stops after `--idle-timeout` seconds with no new
   message (exit 3) or `--hard-cap` seconds in total (exit 2),
   printing one `[gitchat-tail]` line to standard error. Pass
-  smaller values for a shorter wait.
+  smaller values for a shorter wait, larger for a longer one.
 - For a streamed send (`stream:true`), the same command
   renders each `progress` envelope in `seq` order as it
   arrives, resetting the idle timeout, until the terminal
@@ -132,10 +132,19 @@ slug-neutral.
     `[gitchat(<sender> -> <recipient> -> <sender>): <round-trip>]`
   - Always print both footer lines so they delimit the
     reply.
-- `gitchat_serve.py` publishes the worker's output (stdout or
-  `{out_file}`) verbatim as `msg`, trailing newline included,
-  so output ending in a newline renders an extra blank line
-  before footer 1; a worker should not end it with a newline.
+- `gitchat_serve.py` reads the worker's output (stdout, or
+  `{out_file}` when the template names it) as text, so line
+  endings become `\n`. It publishes that text as `msg`
+  without trimming: a `response` on exit 0, an `error` on a
+  nonzero exit. Two cases replace it: a worker past
+  `--worker-timeout` publishes `error` with `msg`
+  `worker_timeout`, and empty or whitespace-only output
+  publishes `error` with `msg`
+  `worker exited <code> with no output. stderr: <stderr>`,
+  where `<stderr>` is the first 500 characters of the
+  trimmed standard error. A kept trailing newline renders an
+  extra blank line before footer 1; a worker should not end
+  its output with a newline.
 - `<time>` is the terminal envelope's `created_at` rendered
   as `hh:mm:ss AM/PM on Ddd, Mon D` in the receiving agent's
   local timezone when known, else UTC with ` UTC` appended.

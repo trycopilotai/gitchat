@@ -184,7 +184,7 @@ fails.
 
 ```sh
 set -eu
-release=v0.1.2
+release=v0.1.3
 install_target="$HOME/.claude/skills/gitchat"
 install_parent="$(dirname "$install_target")"
 mkdir -p "$install_parent"
@@ -221,7 +221,7 @@ the block above is `install_target`.
 
 ```sh
 set -eu
-release=v0.1.2
+release=v0.1.3
 install_target="$HOME/.agents/skills/gitchat"
 install_parent="$(dirname "$install_target")"
 mkdir -p "$install_parent"
