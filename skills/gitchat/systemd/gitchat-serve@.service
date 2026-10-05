@@ -1,0 +1,56 @@
+# gitchat-serve@.service — reboot-surviving gitchat server (systemd user unit).
+#
+# Templated by slug: `gitchat-serve@<slug>` (e.g. gitchat-serve@wsl). All
+# host-specific config comes from an EnvironmentFile so this unit is
+# path-agnostic and is installed unchanged.
+#
+# A server runs prompts from anyone who can push to the remote, through
+# workers that by default run with approvals and sandboxing off. Use only
+# a private remote with trusted writers. See "What serving means" in
+# SKILL.md.
+#
+# Install (user scope, survives reboot):
+#   mkdir -p ~/.config/systemd/user ~/.config/gitchat
+#   cp <skill-dir>/systemd/gitchat-serve@.service ~/.config/systemd/user/
+#   # write ~/.config/gitchat/<slug>.env with at least the lines below.
+#   # Put no comment on a value line: everything after "=" is the value.
+#   #   GITCHAT_SERVE_FOREVER=<skill-dir>/scripts/gitchat_serve_forever.sh
+#   #   GITCHAT_REPO=/abs/path/to/repo
+#   #   GITCHAT_REMOTE=origin
+#   #   GITCHAT_USAGE_CMD=make -s usage ARGS=--json
+#   #   GITCHAT_DEFAULT_PROVIDER=codex
+#   # GITCHAT_USAGE_CMD is any command that prints usage JSON; no `usage`
+#   # make target ships. Optionally add:
+#   #   GITCHAT_CHANNEL_MANIFEST=agents/gitchat-channel.json
+#   #   GITHUB_TOKEN=...
+#   # The first names a tracked manifest you write; leave it out for no
+#   # channel binding. The second is for a remote that needs a tokenized
+#   # push.
+#   loginctl enable-linger "$USER"        # start at boot, run without a login session
+#   systemctl --user daemon-reload
+#   systemctl --user enable --now gitchat-serve@<slug>
+#
+# Inspect: systemctl --user status gitchat-serve@<slug>
+#          journalctl --user -u gitchat-serve@<slug> -f
+
+[Unit]
+Description=gitchat serve daemon (%i)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+EnvironmentFile=%h/.config/gitchat/%i.env
+ExecStart=/usr/bin/env bash ${GITCHAT_SERVE_FOREVER} \
+  --slug %i \
+  --repo ${GITCHAT_REPO} \
+  --remote ${GITCHAT_REMOTE} \
+  --usage-cmd ${GITCHAT_USAGE_CMD} \
+  --default-provider ${GITCHAT_DEFAULT_PROVIDER}
+Restart=always
+RestartSec=5
+# The wrapper already restarts the inner daemon; systemd restarts the
+# wrapper itself if it or the box goes down.
+
+[Install]
+WantedBy=default.target

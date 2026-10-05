@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-labelledby="title description">
+  <title id="title">Animated gitchat send and poll session</title>
+  <desc id="description">A terminal sends a prompt from alpha to beta, polls as beta and gets the prompt, sends a response from beta, then polls as beta twice more and gets nothing and an empty list.</desc>
+  <style>
+    .step-1 {
+      opacity: 0;
+      animation: reveal-1 12s infinite;
+    }
+    @keyframes reveal-1 {
+      0%, 6% { opacity: 0; }
+      10%, 94% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+    .step-2 {
+      opacity: 0;
+      animation: reveal-2 12s infinite;
+    }
+    @keyframes reveal-2 {
+      0%, 22% { opacity: 0; }
+      26%, 94% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+    .step-3 {
+      opacity: 0;
+      animation: reveal-3 12s infinite;
+    }
+    @keyframes reveal-3 {
+      0%, 40% { opacity: 0; }
+      44%, 94% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+    .step-4 {
+      opacity: 0;
+      animation: reveal-4 12s infinite;
+    }
+    @keyframes reveal-4 {
+      0%, 58% { opacity: 0; }
+      62%, 94% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+    .step-5 {
+      opacity: 0;
+      animation: reveal-5 12s infinite;
+    }
+    @keyframes reveal-5 {
+      0%, 74% { opacity: 0; }
+      78%, 94% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .step-1, .step-2, .step-3, .step-4, .step-5 {
+        opacity: 1;
+        animation: none;
+      }
+    }
+  </style>
+  <rect width="1280" height="720" rx="24" fill="#101418" />
+  <circle cx="40" cy="44" r="9" fill="#ff6b6b" />
+  <circle cx="70" cy="44" r="9" fill="#ffd166" />
+  <circle cx="100" cy="44" r="9" fill="#55d6be" />
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16">
+    <text x="40" y="108" fill="#f7fbff" xml:space="preserve">$ send() { python3 skills/gitchat/scripts/gitchat_send.py --message-dir messages/ &quot;$@&quot;; }</text>
+    <text x="40" y="134" fill="#f7fbff" xml:space="preserve">$ poll() { python3 skills/gitchat/scripts/gitchat_poll.py --message-dir messages/ --state-dir state/ &quot;$@&quot;; }</text>
+    <text x="40" y="160" fill="#f7fbff" xml:space="preserve">$ pending() { poll --repo beta --slug beta | python3 -c &#x27;import json, sys; print(json.load(sys.stdin)[&quot;id&quot;])&#x27;; }</text>
+    <g class="step-1">
+      <text x="40" y="200" fill="#f7fbff" xml:space="preserve">$ send --repo alpha --from alpha --to beta --msg &quot;What is 2 + 2?&quot;</text>
+      <text x="40" y="226" fill="#55d6be" xml:space="preserve">exit status: 0</text>
+    </g>
+    <g class="step-2">
+      <text x="40" y="266" fill="#f7fbff" xml:space="preserve">$ poll --repo beta --slug beta</text>
+      <text x="40" y="292" fill="#a7bac5" xml:space="preserve">  &quot;kind&quot;: &quot;prompt&quot;,</text>
+      <text x="40" y="318" fill="#a7bac5" xml:space="preserve">  &quot;msg&quot;: &quot;What is 2 + 2?&quot;,</text>
+      <text x="40" y="344" fill="#55d6be" xml:space="preserve">exit status: 0</text>
+    </g>
+    <g class="step-3">
+      <text x="40" y="384" fill="#f7fbff" xml:space="preserve">$ send --repo beta --from beta --to alpha --kind response --reply-to &quot;$(pending)&quot; --conversation-id &quot;$(pending)&quot; --msg &quot;4&quot;</text>
+      <text x="40" y="410" fill="#55d6be" xml:space="preserve">exit status: 0</text>
+    </g>
+    <g class="step-4">
+      <text x="40" y="450" fill="#f7fbff" xml:space="preserve">$ poll --repo beta --slug beta</text>
+      <text x="40" y="476" fill="#55d6be" xml:space="preserve">exit status: 0</text>
+    </g>
+    <g class="step-5">
+      <text x="40" y="516" fill="#f7fbff" xml:space="preserve">$ poll --repo beta --slug beta --all</text>
+      <text x="40" y="542" fill="#a7bac5" xml:space="preserve">[]</text>
+      <text x="40" y="568" fill="#55d6be" xml:space="preserve">exit status: 0</text>
+    </g>
+  </g>
+  <text x="40" y="692" fill="#a7bac5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="15">Reconstructed from evidence/transcripts/send-poll-session.txt</text>
+</svg>

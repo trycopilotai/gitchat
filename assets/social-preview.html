@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>gitchat</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 1280px;
+        height: 640px;
+        background: #101418;
+      }
+      body {
+        box-sizing: border-box;
+        padding: 72px 80px;
+        color: #f7fbff;
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+      .name {
+        font-size: 44px;
+        font-weight: 600;
+        letter-spacing: -0.5px;
+      }
+      .line {
+        margin-top: 36px;
+        font-size: 30px;
+        line-height: 1.4;
+        color: #a7bac5;
+      }
+      .session {
+        margin-top: 44px;
+        font-size: 24px;
+        line-height: 1.6;
+      }
+      .output {
+        color: #ffd166;
+      }
+      .command {
+        color: #55d6be;
+      }
+      .foot {
+        position: absolute;
+        left: 80px;
+        bottom: 56px;
+        font-size: 22px;
+        color: #a7bac5;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="name">gitchat</div>
+    <div class="line">
+      A poll stops returning a prompt once it is answered.
+    </div>
+    <div class="session">
+      <div class="command">$ poll --repo beta --slug beta --all</div>
+      <div class="output">[]</div>
+    </div>
+    <div class="foot">trycopilot.ai · agent skill · MIT</div>
+  </body>
+</html>

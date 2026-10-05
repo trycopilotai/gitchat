@@ -1,0 +1,18 @@
+{
+  "name": "gitchat",
+  "version": "0.1.0",
+  "description": "Exchange agent messages through Git branches on a shared remote: one side sends a prompt, the other polls for it and pushes back a response.",
+  "author": {
+    "name": "trycopilot.ai"
+  },
+  "homepage": "https://github.com/trycopilotai/gitchat#readme",
+  "repository": "https://github.com/trycopilotai/gitchat",
+  "license": "MIT",
+  "keywords": [
+    "agent-skills",
+    "claude-code",
+    "codex",
+    "git"
+  ],
+  "skills": "./skills/"
+}

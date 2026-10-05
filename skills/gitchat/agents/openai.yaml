@@ -1,0 +1,7 @@
+interface:
+  display_name: "gitchat"
+  short_description:
+    "Agent messages over Git branches"
+  default_prompt:
+    "Use $gitchat to send this prompt to the other host and
+    show its reply."

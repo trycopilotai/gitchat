@@ -1,0 +1,38 @@
+$ send() { python3 skills/gitchat/scripts/gitchat_send.py --message-dir messages/ "$@"; }
+$ poll() { python3 skills/gitchat/scripts/gitchat_poll.py --message-dir messages/ --state-dir state/ "$@"; }
+$ pending() { poll --repo beta --slug beta | python3 -c 'import json, sys; print(json.load(sys.stdin)["id"])'; }
+$ send --repo alpha --from alpha --to beta --msg "What is 2 + 2?"
+{"id": "gitchat-20261005T043524Z-alpha-beta-e9d5222a", "conversation_id": "gitchat-20261005T043524Z-alpha-beta-e9d5222a", "path": "messages/20261005T043524Z-alpha-to-beta-e9d5222a.gpt.json", "branch": "gitchat/alpha-outbox", "published": true}
+$ echo "exit status: $?"
+exit status: 0
+$ poll --repo beta --slug beta
+{
+  "id": "gitchat-20261005T043524Z-alpha-beta-e9d5222a",
+  "conversation_id": "gitchat-20261005T043524Z-alpha-beta-e9d5222a",
+  "from": "alpha",
+  "to": "beta",
+  "kind": "prompt",
+  "created_at": "20261005T043524Z",
+  "reply_to": null,
+  "hops_remaining": 1,
+  "max_responses": 1,
+  "allow_orchestration": false,
+  "repo_head": "unknown",
+  "msg": "What is 2 + 2?",
+  "orchestration_violation": false,
+  "channel_violation": null,
+  "operation_state": "new"
+}
+$ echo "exit status: $?"
+exit status: 0
+$ send --repo beta --from beta --to alpha --kind response --reply-to "$(pending)" --conversation-id "$(pending)" --msg "4"
+{"id": "gitchat-20261005T043525Z-beta-alpha-413f8ff8", "conversation_id": "gitchat-20261005T043524Z-alpha-beta-e9d5222a", "path": "messages/20261005T043525Z-beta-to-alpha-413f8ff8.gpt.json", "branch": "gitchat/beta-outbox", "published": true}
+$ echo "exit status: $?"
+exit status: 0
+$ poll --repo beta --slug beta
+$ echo "exit status: $?"
+exit status: 0
+$ poll --repo beta --slug beta --all
+[]
+$ echo "exit status: $?"
+exit status: 0

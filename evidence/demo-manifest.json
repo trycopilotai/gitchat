@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-04",
+  "skill": {
+    "path": "skills/gitchat/SKILL.md",
+    "sha256": "29e1870e35b0a210a050c9850742fe072b8242ef9d49a04481f80090e21fb3e7"
+  },
+  "programs": [
+    {
+      "path": "skills/gitchat/scripts/gitchat_channel.py",
+      "sha256": "ccc3b715acd80b8af48b7883eee563733ec473271ae30b3c718b345c6047cf96"
+    },
+    {
+      "path": "skills/gitchat/scripts/gitchat_poll.py",
+      "sha256": "c34c728fa517a68f87f1caf0517414a882e61512d9d6d219f6a97e5fe49c80f1"
+    },
+    {
+      "path": "skills/gitchat/scripts/gitchat_send.py",
+      "sha256": "bda9c3f6f964012cc937523dc6cc4f8ba6d76f694d97e801697a7c17289e2797"
+    }
+  ],
+  "agent": {
+    "invoked_the_skill": false,
+    "note": "No agent session used the skill to produce this evidence, and no worker command ran. The send and poll programs were run directly from a shell while this release was being prepared."
+  },
+  "invocation": {
+    "shell_functions": [
+      "send() { python3 skills/gitchat/scripts/gitchat_send.py --message-dir messages/ \"$@\"; }",
+      "poll() { python3 skills/gitchat/scripts/gitchat_poll.py --message-dir messages/ --state-dir state/ \"$@\"; }",
+      "pending() { poll --repo beta --slug beta | python3 -c 'import json, sys; print(json.load(sys.stdin)[\"id\"])'; }"
+    ],
+    "commands": [
+      "send --repo alpha --from alpha --to beta --msg \"What is 2 + 2?\"",
+      "poll --repo beta --slug beta",
+      "send --repo beta --from beta --to alpha --kind response --reply-to \"$(pending)\" --conversation-id \"$(pending)\" --msg \"4\"",
+      "poll --repo beta --slug beta",
+      "poll --repo beta --slug beta --all"
+    ],
+    "interpreter": "Python 3.13.13",
+    "git": "git version 2.50.1 (Apple Git-155)",
+    "working_directory": "a throwaway directory holding a copy of skills/, an empty bare git repository named remote.git, and two empty git repositories named alpha and beta whose origin is remote.git"
+  },
+  "output": {
+    "path": "evidence/transcripts/send-poll-session.txt",
+    "sha256": "516f61580c2e8b1304db07100877e7960c5aea2bac0cebece6032cb5d93cd85b",
+    "edited": false,
+    "transforms": [],
+    "note": "scripts/record_session.py wrote each command line before running it and each exit status line from the command's exit status; everything between is the programs' output, with standard error merged into standard output. The script refuses to write the transcript if the capture contains the throwaway directory's path or the recording machine's hostname, so no replacement was made."
+  }
+}

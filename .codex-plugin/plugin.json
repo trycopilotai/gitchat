@@ -1,0 +1,34 @@
+{
+  "name": "gitchat",
+  "version": "0.1.0",
+  "description": "Exchange agent messages through Git branches on a shared remote: one side sends a prompt, the other polls for it and pushes back a response.",
+  "author": {
+    "name": "trycopilot.ai"
+  },
+  "homepage": "https://github.com/trycopilotai/gitchat#readme",
+  "repository": "https://github.com/trycopilotai/gitchat",
+  "license": "MIT",
+  "keywords": [
+    "agent-skills",
+    "claude-code",
+    "codex",
+    "git"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "gitchat",
+    "shortDescription": "Agent messages over Git branches",
+    "longDescription": "Exchange agent messages through Git branches on a shared remote: one side sends a prompt, the other polls for it and pushes back a response.",
+    "developerName": "trycopilot.ai",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Write",
+      "Execute"
+    ],
+    "websiteURL": "https://github.com/trycopilotai/gitchat",
+    "defaultPrompt": [
+      "Use $gitchat to send this prompt to the other host and show its reply."
+    ]
+  }
+}

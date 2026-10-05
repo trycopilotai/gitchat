@@ -1,0 +1,36 @@
+name: check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.11", "3.13"]
+    steps:
+      # Pinned to commit SHAs. Tags are mutable and this
+      # workflow runs on pull requests from forks.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          # The packaging contract reads the release tag and
+          # the whole history.
+          fetch-depth: 0
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # The transport tests are written for pytest. It is the
+      # only package installed, at one pinned version.
+      - name: Install pytest
+        run: python -m pip install pytest==8.3.4
+
+      - name: Run the transport tests and the packaging contract
+        run: make check PYTHON=python
