@@ -1,0 +1,34 @@
+# gitchat agent invocation: claude-code
+# Rendered by scripts/render_invocation.py from the client's raw JSON
+# output. Tool arguments are truncated at 400 characters. Replaced:
+# plugin directory -> /plugin, scratch directory -> /scratch,
+# capture root -> /work, home directory -> ~, hostname -> host.
+
+model: claude-sonnet-5
+
+## Prompt
+
+Use the gitchat skill (/gitchat) to send bob the prompt "Reply with the number of lines in README.md" and wait for the reply. You are alice, in this git checkout; your slug is alice and the peer slug is bob. Stay inside this directory.
+
+## Tool calls
+
+[1] Skill {"skill": "gitchat:gitchat", "args": "Send a message as alice to peer bob with prompt \"Reply with the number of lines in README.md\", then wait for bob's reply. My slug is alice, peer slug is bob. Stay inside the current directory."}
+    status: ok
+[2] Bash {"command": "pwd && ls -la", "description": "Check current directory contents"}
+    status: exit 0
+[3] Glob {"pattern": "**/gitchat_send.py"}
+    status: ok
+[4] Glob {"pattern": "/plugin/skills/gitchat/**/*.py"}
+    status: ok
+[5] Bash {"command": "cat /work/alice/README.md; echo ---; ls /work/alice/remote.git; echo ---; git remote -v", "description": "Inspect README, remote.git, and git remotes"}
+    status: exit 0
+[6] Bash {"command": "python3 /plugin/skills/gitchat/scripts/gitchat_send.py --help", "description": "Show gitchat_send.py usage"}
+    status: exit 0
+[7] Bash {"command": "python3 /plugin/skills/gitchat/scripts/gitchat_send.py --from alice --to bob --msg \"Reply with the number of lines in README.md\" --repo .", "description": "Send prompt from alice to bob via gitchat"}
+    status: exit 0
+[8] Bash {"command": "python3 /plugin/skills/gitchat/scripts/gitchat_tail.py --conversation gitchat-20261006T024754Z-alice-bob-30e2fee2 --repo . --idle-timeout 120 --hard-cap 1800 --poll-interval 5", "description": "Tail conversation waiting for bob's reply", "timeout": 300000}
+    status: exit 0
+
+## Final message
+
+Bob replied: **5** (the number of lines in README.md). Round trip took 1 second.

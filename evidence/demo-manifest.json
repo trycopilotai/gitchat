@@ -46,5 +46,80 @@
     "edited": false,
     "transforms": [],
     "note": "scripts/record_session.py wrote each command line before running it and each exit status line from the command's exit status; everything between is the programs' output, with standard error merged into standard output. The script refuses to write the transcript if the capture contains the throwaway directory's path or the recording machine's hostname, so no replacement was made."
-  }
+  },
+  "invocations": [
+    {
+      "product": "Claude Code",
+      "version": "2.1.220",
+      "model": "claude-sonnet-5",
+      "invocation": "/gitchat",
+      "prompt": "Use the gitchat skill (/gitchat) to send bob the prompt \"Reply with the number of lines in README.md\" and wait for the reply. You are alice, in this git checkout; your slug is alice and the peer slug is bob. Stay inside this directory.",
+      "launch": "claude --print --verbose --output-format stream-json --plugin-dir <a clone of this repository at v0.1.3> --permission-mode acceptEdits --allowedTools \"Bash,Read,Write,Edit,Glob,Grep,Skill\" --max-budget-usd 10 \"<prompt>\", run from alice",
+      "skill_release": "v0.1.3",
+      "fixture": "A throwaway directory holding alice, a git repository (branch main, one commit of a five-line README.md, commits as Test <test@example.com>) whose origin is a local bare repository at alice/remote.git, excluded from alice's status; and bob, a clone of that remote. No network remote. While the agent waited, the operator, as bob, ran gitchat_poll.py once and published one response, \"5\", with gitchat_send.py --kind response. No serve loop and no worker ran. A local clone of this repository at v0.1.3 sat beside alice and was passed as --plugin-dir.",
+      "date": "2026-10-05",
+      "started_utc": "2026-10-06T02:47:29Z",
+      "transcript": {
+        "path": "evidence/transcripts/2026-10-05-claude-code-invocation.txt",
+        "sha256": "7fa27fd26157fd6f92dd47ae8606eba73994695ebbeba96e83ece93d84007184"
+      },
+      "raw_output_sha256": "096118c9468e3bdb1d8031ab96c6a1985868c23b96a014aa6234be49d7c2cf28",
+      "transforms": [
+        "replace-plugin-root",
+        "replace-scratch-root",
+        "replace-capture-root",
+        "replace-home",
+        "replace-hostname"
+      ],
+      "invoked_the_skill": true,
+      "pickup": "Skill tool call with skill gitchat:gitchat (transcript call [1]).",
+      "outcome": "Sent the prompt with gitchat_send.py, waited with gitchat_tail.py at its documented defaults, and reported bob's reply, 5; all calls exited 0.",
+      "note": "This is the second Claude Code run. The first, listed below with published false, used the same prompt with --plugin-dir pointing at a clone outside the capture directory.",
+      "published": true
+    },
+    {
+      "product": "Codex",
+      "version": "0.146.0",
+      "model": "gpt-5.6-sol",
+      "model_source": "Codex's own session record for this run; the --json stream does not carry the model.",
+      "invocation": "$gitchat",
+      "prompt": "Use the gitchat skill ($gitchat) to send bob the prompt \"Reply with the number of lines in README.md\" and wait for the reply. You are alice, in this git checkout; your slug is alice and the peer slug is bob. Stay inside this directory.",
+      "launch": "codex exec --json --sandbox workspace-write --skip-git-repo-check -C alice -o <last-message file> \"<prompt>\" < /dev/null",
+      "skill_release": "v0.1.3",
+      "fixture": "A throwaway directory holding alice, a git repository (branch main, one commit of a five-line README.md, commits as Test <test@example.com>) whose origin is a local bare repository at alice/remote.git, excluded from alice's status; and bob, a clone of that remote. No network remote. While the agent waited, the operator, as bob, ran gitchat_poll.py once and published one response, \"5\", with gitchat_send.py --kind response. No serve loop and no worker ran. The skill was copied as real files into alice/.agents/skills/gitchat and committed.",
+      "date": "2026-10-05",
+      "started_utc": "2026-10-06T02:45:05Z",
+      "transcript": {
+        "path": "evidence/transcripts/2026-10-05-codex-invocation.txt",
+        "sha256": "5e789b9720a030569188584a9777c5b7f7e402809ba75d44a42a038618206da1"
+      },
+      "raw_output_sha256": "407a616fb5b5e252af1938197797a5c8f21e56e9f5dce0724cf5125a709f2cd6",
+      "transforms": [
+        "replace-plugin-root",
+        "replace-scratch-root",
+        "replace-capture-root",
+        "replace-home",
+        "replace-hostname"
+      ],
+      "invoked_the_skill": true,
+      "pickup": "The agent read .agents/skills/gitchat/SKILL.md (transcript call [1]).",
+      "outcome": "The first gitchat_send.py exited 1 because the sandbox kept alice's .git read-only; the agent cloned the bare remote into a temporary directory inside alice, sent and tailed from that clone, reported bob's reply, 5, and removed the clone.",
+      "published": true
+    },
+    {
+      "product": "Claude Code",
+      "version": "2.1.220",
+      "model": "claude-sonnet-5",
+      "invocation": "/gitchat",
+      "prompt": "Use the gitchat skill (/gitchat) to send bob the prompt \"Reply with the number of lines in README.md\" and wait for the reply. You are alice, in this git checkout; your slug is alice and the peer slug is bob. Stay inside this directory.",
+      "skill_release": "v0.1.3",
+      "date": "2026-10-05",
+      "started_utc": "2026-10-06T02:45:04Z",
+      "published": false,
+      "raw_output_sha256": "d2530029408aa917b6520fdfa0f31cc31465c0e8547efd6537c1fdcd8f4c0a94",
+      "invoked_the_skill": true,
+      "pickup": "Skill tool call with skill gitchat:gitchat.",
+      "outcome": "Sent the prompt, tailed and reported bob's reply, 5, but one Glob searched a directory above the fixture, outside the directory the prompt allowed, so the run counts as contaminated by its environment and its transcript is not published."
+    }
+  ]
 }

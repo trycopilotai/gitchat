@@ -37,6 +37,22 @@ README = ROOT / "README.md"
 SECURITY = ROOT / "SECURITY.md"
 TRANSCRIPT = ROOT / "evidence" / "transcripts" / "send-poll-session.txt"
 MANIFEST = ROOT / "evidence" / "demo-manifest.json"
+RENDER = ROOT / "scripts" / "render_invocation.py"
+TRANSFORMS = [
+    "replace-plugin-root",
+    "replace-scratch-root",
+    "replace-capture-root",
+    "replace-home",
+    "replace-hostname",
+]
+PRIVATE_MARKERS = (
+    "/Users",
+    "/home/",
+    "/private",
+    "/var/folders",
+    "/tmp",
+    "-Users-",
+)
 CLAIM = "A poll stops returning a prompt once it is answered."
 REPOSITORY = "https://github.com/trycopilotai/" + NAME
 SECURITY_STATEMENTS = (
@@ -445,6 +461,132 @@ class EvidenceTest(unittest.TestCase):
         text = read(TRANSCRIPT)
         for marker in ("/var/folders", "/tmp", "/Users", "/home"):
             self.assertNotIn(marker, text)
+
+
+class InvocationTest(unittest.TestCase):
+    def invocations(self) -> list:
+        """The published runs, one per client."""
+        records = json.loads(read(MANIFEST))["invocations"]
+        return [item for item in records if item["published"] is True]
+
+    def test_unpublished_runs_are_listed_without_a_transcript(self) -> None:
+        records = json.loads(read(MANIFEST))["invocations"]
+        hidden = [item for item in records if item["published"] is not True]
+        for item in hidden:
+            self.assertIs(item["published"], False)
+            self.assertNotIn("transcript", item)
+            self.assertRegex(item["raw_output_sha256"], r"^[0-9a-f]{64}$")
+            self.assertTrue(item["outcome"])
+
+    def test_one_invocation_per_declared_client(self) -> None:
+        records = self.invocations()
+        self.assertEqual(
+            [(item["product"], item["invocation"]) for item in records],
+            [("Claude Code", "/" + NAME), ("Codex", "$" + NAME)],
+        )
+        prompts = {item["prompt"].replace(item["invocation"], "<name>") for item in records}
+        self.assertEqual(len(prompts), 1)
+        for item in records:
+            self.assertIs(item["invoked_the_skill"], True)
+            self.assertEqual(item["transforms"], TRANSFORMS)
+            self.assertRegex(item["raw_output_sha256"], r"^[0-9a-f]{64}$")
+            self.assertRegex(item["date"], r"^\d{4}-\d{2}-\d{2}$")
+            for field in ("version", "model", "fixture", "outcome", "pickup"):
+                self.assertTrue(item[field], field)
+
+    def test_transcript_hashes_match_the_manifest(self) -> None:
+        for item in self.invocations():
+            path = ROOT / item["transcript"]["path"]
+            slug = "claude-code" if item["product"] == "Claude Code" else "codex"
+            self.assertEqual(path.name, item["date"] + "-" + slug + "-invocation.txt")
+            self.assertEqual(item["transcript"]["sha256"], sha256(path))
+
+    def test_every_transcript_is_bound_by_the_manifest(self) -> None:
+        listed = {TRANSCRIPT.name} | {
+            Path(item["transcript"]["path"]).name for item in self.invocations()
+        }
+        present = {path.name for path in TRANSCRIPT.parent.iterdir()}
+        self.assertEqual(present, listed)
+
+    def test_transcripts_show_the_prompt_and_the_pickup(self) -> None:
+        for item in self.invocations():
+            text = read(ROOT / item["transcript"]["path"])
+            self.assertIn("\n## Prompt\n\n" + item["prompt"] + "\n", text)
+            self.assertIn("\n## Final message\n", text)
+            first = re.search(r"^\[1\] .*$", text, flags=re.M).group(0)
+            if item["product"] == "Claude Code":
+                self.assertTrue(first.startswith('[1] Skill {"skill": "gitchat:gitchat"'))
+                self.assertIn("model: " + item["model"] + "\n", text)
+            else:
+                self.assertIn(".agents/skills/gitchat/SKILL.md", first)
+
+    def test_transcripts_carry_no_private_path(self) -> None:
+        for item in self.invocations():
+            text = read(ROOT / item["transcript"]["path"])
+            for marker in PRIVATE_MARKERS:
+                self.assertNotIn(marker, text, item["transcript"]["path"])
+            self.assertNotRegex(text, r"claude-[0-9]")
+
+    def test_readme_links_both_transcripts(self) -> None:
+        text = read(README)
+        self.assertIn("### Agent invocations", text)
+        for item in self.invocations():
+            self.assertIn("](" + item["transcript"]["path"] + ")", text)
+
+
+class RenderTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.render = load(RENDER, "render_invocation")
+
+    def test_replacements_cover_whole_prefixes_in_order(self) -> None:
+        apply = self.render.transformer(
+            ["/h/me/src/plugin"], "/h/me/run", "/h/me", "box.local"
+        )
+        self.assertEqual(
+            apply("cd /h/me/src/plugin/scripts && ls /h/me/run/alice /h/me/runner"),
+            "cd /plugin/scripts && ls /work/alice ~/runner",
+        )
+        self.assertEqual(apply("/h/mein /x/h/me"), "/h/mein /x/h/me")
+        self.assertEqual(
+            apply("/private/tmp/claude-1000/-h-me-slug/tasks/a.out"),
+            "/scratch/tasks/a.out",
+        )
+        self.assertEqual(apply("on box.local, not box.localdomain"), "on host, not box.localdomain")
+
+    def test_claude_code_stream(self) -> None:
+        stream = [
+            {"type": "system", "subtype": "init", "model": "m-1"},
+            {"type": "assistant", "message": {"content": [
+                {"type": "tool_use", "id": "a", "name": "Skill", "input": {"skill": "gitchat:gitchat"}},
+                {"type": "tool_use", "id": "b", "name": "Bash", "input": {"command": "x" * 500}},
+                {"type": "tool_use", "id": "c", "name": "Bash", "input": {"command": "false"}},
+            ]}},
+            {"type": "user", "message": {"content": [
+                {"type": "tool_result", "tool_use_id": "a", "content": "ok"},
+                {"type": "tool_result", "tool_use_id": "b", "is_error": False, "content": "out"},
+                {"type": "tool_result", "tool_use_id": "c", "is_error": True, "content": "Exit code 1\n"},
+            ]}},
+            {"type": "result", "result": "Done.\n\n5"},
+        ]
+        text = self.render.render("claude-code", stream, "Go.\n", lambda value: value)
+        self.assertIn("model: m-1\n", text)
+        self.assertIn('[1] Skill {"skill": "gitchat:gitchat"}\n    status: ok\n', text)
+        self.assertIn(" ... [%d more characters]\n    status: exit 0\n" % (len('{"command": "' + "x" * 500 + '"}') - 400), text)
+        self.assertIn("    status: exit 1\n", text)
+        self.assertTrue(text.endswith("## Final message\n\nDone.\n\n5\n"))
+
+    def test_codex_stream(self) -> None:
+        stream = [
+            {"type": "item.started", "item": {"type": "command_execution", "command": "ls"}},
+            {"type": "item.completed", "item": {"type": "agent_message", "text": "first"}},
+            {"type": "item.completed", "item": {"type": "command_execution", "command": "ls", "exit_code": 2}},
+            {"type": "item.completed", "item": {"type": "agent_message", "text": "last"}},
+        ]
+        text = self.render.render("codex", stream, "Go.", lambda value: value)
+        self.assertIn("model: (not in this stream)\n", text)
+        self.assertIn("[1] command_execution ls\n    status: exit 2\n", text)
+        self.assertNotIn("[2]", text)
+        self.assertTrue(text.endswith("## Final message\n\nlast\n"))
 
 
 class DemoTest(unittest.TestCase):

@@ -49,7 +49,7 @@ limits.
 
 **Not measured, stated up front.**
 
-- No agent used the skill to produce the evidence here. The
+- No agent used the skill to produce the demo session. Its
   transcript shows `gitchat_send.py` and `gitchat_poll.py`
   run from a shell, on one machine, against a local bare
   repository.
@@ -67,8 +67,9 @@ limits.
   script disagree, the script is what runs; the
   disagreements found so far are under "Known limits" in
   `SECURITY.md`.
-- Neither Claude Code nor Codex was started to confirm that
-  the invocation names below resolve.
+- The install blocks below were not run for the agent
+  invocations: Claude Code loaded the skill from a plugin
+  directory and Codex from the fixture's `.agents/skills/`.
 
 ## What is in it
 
@@ -184,7 +185,7 @@ fails.
 
 ```sh
 set -eu
-release=v0.1.3
+release=v0.1.5
 install_target="$HOME/.claude/skills/gitchat"
 install_parent="$(dirname "$install_target")"
 mkdir -p "$install_parent"
@@ -221,7 +222,7 @@ the block above is `install_target`.
 
 ```sh
 set -eu
-release=v0.1.3
+release=v0.1.5
 install_target="$HOME/.agents/skills/gitchat"
 install_parent="$(dirname "$install_target")"
 mkdir -p "$install_parent"
@@ -312,6 +313,36 @@ and the SHA-256 of `SKILL.md`, of the three programs the
 session ran, and of the transcript. The ids, timestamps and
 nonces in the transcript are as recorded and differ on every
 recording.
+
+### Agent invocations
+
+One run per client on one synthetic fixture: in a checkout
+named `alice`, the agent was asked to send `bob` the prompt
+"Reply with the number of lines in README.md" and wait for
+the reply. `bob` was not an agent: while the agent waited, a
+shell polled once as `bob` and published the response `5`
+with `gitchat_send.py`. No serve loop or worker ran. These
+are worked examples, not a benchmark.
+
+- [`evidence/transcripts/2026-10-05-claude-code-invocation.txt`](evidence/transcripts/2026-10-05-claude-code-invocation.txt):
+  Claude Code 2.1.220 loaded the skill through the `Skill`
+  tool, sent with `gitchat_send.py`, waited with
+  `gitchat_tail.py` and reported the reply `5`.
+- [`evidence/transcripts/2026-10-05-codex-invocation.txt`](evidence/transcripts/2026-10-05-codex-invocation.txt):
+  Codex 0.146.0 read `SKILL.md`; its first send exited 1
+  because the `workspace-write` sandbox kept the checkout's
+  `.git` read-only, so it sent and tailed from a temporary
+  clone of the remote inside the checkout, reported `5` and
+  removed the clone.
+
+An earlier Claude Code run reached the same reply but
+searched a directory above the fixture; the manifest lists
+it as unpublished, with its outcome.
+
+`scripts/render_invocation.py` rendered both from the
+clients' raw JSON output, which is not committed;
+`evidence/demo-manifest.json` lists each run's versions,
+model, prompt, hashes and the path replacements it made.
 
 `make check` runs the transport tests and a packaging
 contract that ties this file, both plugin manifests, the
