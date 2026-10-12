@@ -365,7 +365,7 @@ See [`SECURITY.md`](SECURITY.md).
 
 ## License
 
-MIT. See [`LICENSE`](LICENSE).
+MIT license. See [`LICENSE`](LICENSE).
 
 ## Not affiliated with GitHub or GitHub Copilot
 
