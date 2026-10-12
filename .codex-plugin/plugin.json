@@ -3,7 +3,7 @@
   "version": "0.1.5",
   "description": "Exchange agent messages through Git branches on a shared remote: one side sends a prompt, the other polls for it and pushes back a response.",
   "author": {
-    "name": "trycopilot.ai"
+    "name": "trycopilot.ai LLC"
   },
   "homepage": "https://github.com/trycopilotai/gitchat#readme",
   "repository": "https://github.com/trycopilotai/gitchat",
@@ -19,7 +19,7 @@
     "displayName": "gitchat",
     "shortDescription": "Agent messages over Git branches",
     "longDescription": "Exchange agent messages through Git branches on a shared remote: one side sends a prompt, the other polls for it and pushes back a response.",
-    "developerName": "trycopilot.ai",
+    "developerName": "trycopilot.ai LLC",
     "category": "Developer Tools",
     "capabilities": [
       "Interactive",
