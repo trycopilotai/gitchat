@@ -1,0 +1,34 @@
+# Copy to .github/workflows/auto-lint-pr.yml. Replace the pin with
+# the newest release: the commit its signed tag peels to, with the
+# tag in the trailing comment. Keep lint.yml on the lint release
+# that this auto-lint-pr release carries (its lint-dependency.json),
+# so both apply one formatting policy.
+#
+# Before the first run, turn on the repository or organization
+# Actions setting "Allow GitHub Actions to create and approve pull
+# requests". Token permissions do not change that setting.
+name: auto-lint-pr
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  auto-lint:
+    # A reusable workflow cannot elevate the caller's token, so the
+    # calling job grants everything the called jobs ask for.
+    permissions:
+      contents: write
+      issues: write
+      packages: read
+      pull-requests: write
+    uses: trycopilotai/auto-lint-pr/.github/workflows/auto-lint-pr.yml@672c631aeba51f87dfc1c24f7a83e90ecad73c67 # v0.1.2
+    with:
+      paths:
+        "README.md SECURITY.md CONTRIBUTING.md .github tests
+        scripts"

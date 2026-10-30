@@ -4,6 +4,7 @@ PYTHON ?= python3
 check:
 	@$(PYTHON) -m pytest -q -p no:cacheprovider tests/test_gitchat_channel.py tests/test_gitchat_serve.py tests/test_gitchat_stream_log.py
 	@$(PYTHON) tests/test_integrations.py
+	@$(PYTHON) tests/test_readme_badges.py
 
 record:
 	@$(PYTHON) scripts/record_session.py

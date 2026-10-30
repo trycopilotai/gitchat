@@ -6,6 +6,10 @@ branches on a remote they share as the transport. Each
 message is a small JSON envelope committed to the sender's
 `gitchat/<sender>-outbox` branch and pushed.
 
+[![auto-lint-pr](https://github.com/trycopilotai/gitchat/actions/workflows/auto-lint-pr.yml/badge.svg)](https://github.com/trycopilotai/gitchat/actions/workflows/auto-lint-pr.yml)
+[![check](https://github.com/trycopilotai/gitchat/actions/workflows/check.yml/badge.svg)](https://github.com/trycopilotai/gitchat/actions/workflows/check.yml)
+[![lint](https://github.com/trycopilotai/gitchat/actions/workflows/lint.yml/badge.svg)](https://github.com/trycopilotai/gitchat/actions/workflows/lint.yml)
+
 A poll stops returning a prompt once it is answered.
 
 <picture>
