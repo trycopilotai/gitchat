@@ -2,13 +2,18 @@
 
 A skill and a set of scripts that let an agent in one Git
 checkout send a prompt to an agent in another, using
-branches on a remote they share as the transport. Each
-message is a small JSON envelope committed to the sender's
-`gitchat/<sender>-outbox` branch and pushed.
+branches on a remote they share as the transport.
+
+---
 
 [![auto-lint-pr](https://github.com/trycopilotai/gitchat/actions/workflows/auto-lint-pr.yml/badge.svg)](https://github.com/trycopilotai/gitchat/actions/workflows/auto-lint-pr.yml)
 [![check](https://github.com/trycopilotai/gitchat/actions/workflows/check.yml/badge.svg)](https://github.com/trycopilotai/gitchat/actions/workflows/check.yml)
 [![lint](https://github.com/trycopilotai/gitchat/actions/workflows/lint.yml/badge.svg)](https://github.com/trycopilotai/gitchat/actions/workflows/lint.yml)
+
+---
+
+Each message is a small JSON envelope committed to the
+sender's `gitchat/<sender>-outbox` branch and pushed.
 
 A poll stops returning a prompt once it is answered.
 
