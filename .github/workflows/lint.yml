@@ -1,0 +1,30 @@
+# Copy to .github/workflows/lint.yml. Replace both pins with the
+# newest releases: the commit each release tag peels to, with the
+# tag in the trailing comment.
+name: lint
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      # Pinned to commit SHAs. Tags are mutable and this workflow
+      # runs on pull requests from forks.
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: trycopilotai/lint@3c4322bf89aedcd1c5ce5b8cc37c24be63dd09c1 # v0.1.8
+        with:
+          mode: read-only
+          cwd: .
+          docker: "true"
+          paths:
+            "README.md SECURITY.md CONTRIBUTING.md .github
+            tests scripts"
