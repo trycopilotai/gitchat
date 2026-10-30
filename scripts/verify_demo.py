@@ -34,7 +34,7 @@ MINIMUM_CONTRAST = 4.5
 
 TEXT_ELEMENT = re.compile(
     r'<text x="(?P<x>\d+)" y="(?P<y>\d+)" fill="(?P<fill>#[0-9a-f]{6})"'
-    r'(?P<rest>[^>]*)>(?P<body>[^<]*)</text>'
+    r"(?P<rest>[^>]*)>(?P<body>[^<]*)</text>"
 )
 KEYFRAMES = re.compile(
     r"@keyframes reveal-(?P<step>\d+) \{\s*"
@@ -96,7 +96,9 @@ def problems_in(generator, transcript: str) -> list[str]:
         for match in session:
             line = html.unescape(match.group("body"))
             if line not in transcript_lines:
-                problems.append("%s shows a line the transcript lacks: %r" % (name, line))
+                problems.append(
+                    "%s shows a line the transcript lacks: %r" % (name, line)
+                )
             width = int(match.group("x")) + len(line) * generator.GLYPH_WIDTH
             if width > generator.WIDTH - generator.MARGIN_X:
                 problems.append("%s: a line overruns the canvas: %r" % (name, line))

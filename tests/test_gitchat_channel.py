@@ -71,7 +71,9 @@ def channel_repo(tmp_path):
     git(repo, "init", "-b", "main")
     git(repo, "config", "user.name", "test")
     git(repo, "config", "user.email", "test@example.invalid")
-    git(repo, "remote", "add", "origin", "https://github.com/example-owner/example-repo")
+    git(
+        repo, "remote", "add", "origin", "https://github.com/example-owner/example-repo"
+    )
     manifest = repo / "channel.json"
     manifest.write_text(
         json.dumps(manifest_value(), indent=2) + "\n",
@@ -85,15 +87,30 @@ def channel_repo(tmp_path):
 @pytest.mark.parametrize(
     ("remote", "expected"),
     [
-        ("https://github.com/example-owner/example-repo", "github.com/example-owner/example-repo"),
-        ("https://github.com/example-owner/example-repo.git", "github.com/example-owner/example-repo"),
+        (
+            "https://github.com/example-owner/example-repo",
+            "github.com/example-owner/example-repo",
+        ),
+        (
+            "https://github.com/example-owner/example-repo.git",
+            "github.com/example-owner/example-repo",
+        ),
         (
             "https://x-access-token:redacted@github.com/example-owner/example-repo.git",
             "github.com/example-owner/example-repo",
         ),
-        ("git@github.com:example-owner/example-repo.git", "github.com/example-owner/example-repo"),
-        ("ssh://git@github.com/example-owner/example-repo.git", "github.com/example-owner/example-repo"),
-        ("https://github.com/EXAMPLE-OWNER/Example-Repo", "github.com/example-owner/example-repo"),
+        (
+            "git@github.com:example-owner/example-repo.git",
+            "github.com/example-owner/example-repo",
+        ),
+        (
+            "ssh://git@github.com/example-owner/example-repo.git",
+            "github.com/example-owner/example-repo",
+        ),
+        (
+            "https://github.com/EXAMPLE-OWNER/Example-Repo",
+            "github.com/example-owner/example-repo",
+        ),
     ],
 )
 def test_normalize_supported_github_urls(remote, expected):
@@ -363,13 +380,9 @@ def test_envelope_violation_rejects_mismatch_and_digest_tamper():
     tampered = operation_prompt()
     tampered["msg"] = "changed"
 
+    assert channel.envelope_violation(mismatch, binding()) == "channel_mismatch"
     assert (
-        channel.envelope_violation(mismatch, binding())
-        == "channel_mismatch"
-    )
-    assert (
-        channel.envelope_violation(tampered, binding())
-        == "operation_digest_mismatch"
+        channel.envelope_violation(tampered, binding()) == "operation_digest_mismatch"
     )
 
 
