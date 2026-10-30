@@ -1,8 +1,9 @@
-"""Pin the README's CI status badges to the workflow files.
+"""Pin the README header layout and its CI status badges to the workflow files.
 
-A workflow that only runs when another workflow calls it gets no badge. Every other
-workflow needs exactly one linked badge between the README title and its first
-second-level heading, so a new workflow cannot ship without one. lint.yml and
+The header is the title, a one-sentence subtitle, a `---` rule, the CI badges, and a
+second `---` rule, then the rest of the README. A workflow that only runs when another
+workflow calls it gets no badge. Every other workflow needs exactly one linked badge
+between the two rules, so a new workflow cannot ship without one. lint.yml and
 auto-lint-pr.yml must select the same files.
 """
 
@@ -75,10 +76,10 @@ def read_workflow(path):
 
 
 def scan_readme(text):
-    """Return the lines, the title's index, and the first ## heading's index."""
+    """Return the lines and the indexes of the title and of the first two --- rules."""
     lines = text.split("\n")
     title = None
-    first_section = len(lines)
+    rules = []
     fence = None
     for index, line in enumerate(lines):
         stripped = line.lstrip()
@@ -92,11 +93,13 @@ def scan_readme(text):
         if title is None:
             if line.startswith("# ") or "<h1" in line:
                 title = index
-        elif line.startswith("## ") and first_section == len(lines):
-            first_section = index
+        elif line.strip() == "---" and len(rules) < 2:
+            rules.append(index)
     if title is None:
         raise AssertionError("README has no title")
-    return lines, title, first_section
+    if len(rules) < 2:
+        raise AssertionError("README needs two --- rules under the title and subtitle")
+    return lines, title, rules[0], rules[1]
 
 
 def workflow_inputs(path):
@@ -133,7 +136,7 @@ def workflow_inputs(path):
 class ReadmeBadgeTest(unittest.TestCase):
     def test_every_runnable_workflow_has_one_badge_below_the_title(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
-        lines, title, first_section = scan_readme(readme)
+        lines, title, rule_one, rule_two = scan_readme(readme)
         paths = sorted(WORKFLOWS.glob("*.yml")) + sorted(WORKFLOWS.glob("*.yaml"))
         runnable = 0
         for path in paths:
@@ -149,11 +152,41 @@ class ReadmeBadgeTest(unittest.TestCase):
             self.assertEqual(readme.count(image), 1, path.name + " badge image")
             at = [i for i, line in enumerate(lines) if badge in line]
             self.assertTrue(
-                title < at[0] < first_section,
-                "%s: badge on line %d is outside the title and the first section"
+                rule_one < at[0] < rule_two,
+                "%s: badge on line %d is not between the two --- rules"
                 % (path.name, at[0] + 1),
             )
         self.assertGreater(runnable, 0, "no runnable workflow found")
+
+    def test_header_is_title_subtitle_rule_badges_rule(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        lines, title, rule_one, rule_two = scan_readme(readme)
+        for rule in (rule_one, rule_two):
+            self.assertEqual(
+                lines[rule - 1].strip(), "", "a --- rule needs a blank line above it"
+            )
+            self.assertEqual(
+                lines[rule + 1].strip(), "", "a --- rule needs a blank line below it"
+            )
+        subtitle = [line for line in lines[title + 1 : rule_one] if line.strip()]
+        self.assertTrue(
+            subtitle, "no subtitle between the title and the first --- rule"
+        )
+        blocks = 0
+        previous_blank = True
+        for line in lines[title + 1 : rule_one]:
+            if line.strip() and previous_blank:
+                blocks += 1
+            previous_blank = not line.strip()
+        self.assertEqual(blocks, 1, "the subtitle must be one paragraph")
+        for line in lines[rule_one + 1 : rule_two]:
+            if not line.strip():
+                continue
+            self.assertTrue(
+                "badge.svg" in line
+                or line.strip() in ('<div align="center">', "</div>"),
+                "only badges may sit between the --- rules: " + line[:60],
+            )
 
     def test_lint_and_auto_lint_pr_select_the_same_files(self):
         lint = WORKFLOWS / "lint.yml"
