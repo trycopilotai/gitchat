@@ -32,5 +32,6 @@ jobs:
       - name: Install pytest
         run: python -m pip install pytest==8.3.4
 
-      - name: Run the transport tests and the packaging contract
+      - name:
+          Run the transport tests and the packaging contract
         run: make check PYTHON=python

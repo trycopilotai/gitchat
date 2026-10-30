@@ -484,7 +484,9 @@ class InvocationTest(unittest.TestCase):
             [(item["product"], item["invocation"]) for item in records],
             [("Claude Code", "/" + NAME), ("Codex", "$" + NAME)],
         )
-        prompts = {item["prompt"].replace(item["invocation"], "<name>") for item in records}
+        prompts = {
+            item["prompt"].replace(item["invocation"], "<name>") for item in records
+        }
         self.assertEqual(len(prompts), 1)
         for item in records:
             self.assertIs(item["invoked_the_skill"], True)
@@ -515,7 +517,9 @@ class InvocationTest(unittest.TestCase):
             self.assertIn("\n## Final message\n", text)
             first = re.search(r"^\[1\] .*$", text, flags=re.M).group(0)
             if item["product"] == "Claude Code":
-                self.assertTrue(first.startswith('[1] Skill {"skill": "gitchat:gitchat"'))
+                self.assertTrue(
+                    first.startswith('[1] Skill {"skill": "gitchat:gitchat"')
+                )
                 self.assertIn("model: " + item["model"] + "\n", text)
             else:
                 self.assertIn(".agents/skills/gitchat/SKILL.md", first)
@@ -551,36 +555,89 @@ class RenderTest(unittest.TestCase):
             apply("/private/tmp/claude-1000/-h-me-slug/tasks/a.out"),
             "/scratch/tasks/a.out",
         )
-        self.assertEqual(apply("on box.local, not box.localdomain"), "on host, not box.localdomain")
+        self.assertEqual(
+            apply("on box.local, not box.localdomain"), "on host, not box.localdomain"
+        )
 
     def test_claude_code_stream(self) -> None:
         stream = [
             {"type": "system", "subtype": "init", "model": "m-1"},
-            {"type": "assistant", "message": {"content": [
-                {"type": "tool_use", "id": "a", "name": "Skill", "input": {"skill": "gitchat:gitchat"}},
-                {"type": "tool_use", "id": "b", "name": "Bash", "input": {"command": "x" * 500}},
-                {"type": "tool_use", "id": "c", "name": "Bash", "input": {"command": "false"}},
-            ]}},
-            {"type": "user", "message": {"content": [
-                {"type": "tool_result", "tool_use_id": "a", "content": "ok"},
-                {"type": "tool_result", "tool_use_id": "b", "is_error": False, "content": "out"},
-                {"type": "tool_result", "tool_use_id": "c", "is_error": True, "content": "Exit code 1\n"},
-            ]}},
+            {
+                "type": "assistant",
+                "message": {
+                    "content": [
+                        {
+                            "type": "tool_use",
+                            "id": "a",
+                            "name": "Skill",
+                            "input": {"skill": "gitchat:gitchat"},
+                        },
+                        {
+                            "type": "tool_use",
+                            "id": "b",
+                            "name": "Bash",
+                            "input": {"command": "x" * 500},
+                        },
+                        {
+                            "type": "tool_use",
+                            "id": "c",
+                            "name": "Bash",
+                            "input": {"command": "false"},
+                        },
+                    ]
+                },
+            },
+            {
+                "type": "user",
+                "message": {
+                    "content": [
+                        {"type": "tool_result", "tool_use_id": "a", "content": "ok"},
+                        {
+                            "type": "tool_result",
+                            "tool_use_id": "b",
+                            "is_error": False,
+                            "content": "out",
+                        },
+                        {
+                            "type": "tool_result",
+                            "tool_use_id": "c",
+                            "is_error": True,
+                            "content": "Exit code 1\n",
+                        },
+                    ]
+                },
+            },
             {"type": "result", "result": "Done.\n\n5"},
         ]
         text = self.render.render("claude-code", stream, "Go.\n", lambda value: value)
         self.assertIn("model: m-1\n", text)
         self.assertIn('[1] Skill {"skill": "gitchat:gitchat"}\n    status: ok\n', text)
-        self.assertIn(" ... [%d more characters]\n    status: exit 0\n" % (len('{"command": "' + "x" * 500 + '"}') - 400), text)
+        self.assertIn(
+            " ... [%d more characters]\n    status: exit 0\n"
+            % (len('{"command": "' + "x" * 500 + '"}') - 400),
+            text,
+        )
         self.assertIn("    status: exit 1\n", text)
         self.assertTrue(text.endswith("## Final message\n\nDone.\n\n5\n"))
 
     def test_codex_stream(self) -> None:
         stream = [
-            {"type": "item.started", "item": {"type": "command_execution", "command": "ls"}},
-            {"type": "item.completed", "item": {"type": "agent_message", "text": "first"}},
-            {"type": "item.completed", "item": {"type": "command_execution", "command": "ls", "exit_code": 2}},
-            {"type": "item.completed", "item": {"type": "agent_message", "text": "last"}},
+            {
+                "type": "item.started",
+                "item": {"type": "command_execution", "command": "ls"},
+            },
+            {
+                "type": "item.completed",
+                "item": {"type": "agent_message", "text": "first"},
+            },
+            {
+                "type": "item.completed",
+                "item": {"type": "command_execution", "command": "ls", "exit_code": 2},
+            },
+            {
+                "type": "item.completed",
+                "item": {"type": "agent_message", "text": "last"},
+            },
         ]
         text = self.render.render("codex", stream, "Go.", lambda value: value)
         self.assertIn("model: (not in this stream)\n", text)

@@ -54,9 +54,9 @@ the shell functions and commands listed in the manifest in a
 throwaway directory, writes the transcript as captured, and
 rewrites the manifest's hashes, date, interpreter and git
 version. It needs `bash` and, on `PATH`, git 2.42 or later;
-it needs no `pytest`. Each message carries a new timestamp and
-nonce, so the transcript changes even when the programs did
-not. `make demo` rebuilds the two images from the
+it needs no `pytest`. Each message carries a new timestamp
+and nonce, so the transcript changes even when the programs
+did not. `make demo` rebuilds the two images from the
 transcript. `make assets` rebuilds the social preview and
 needs Chrome or Chromium; `make asset-check` does not.
 
@@ -89,16 +89,16 @@ else.
 Several identifiers in the scripts are wire names that
 running deployments depend on: the `.gpt.json` suffix of
 envelope and state files, the `p13i/gitchat/...` schema
-strings, the `refs/p13i/gitchat/claims/` ref prefix, and
-the `p13i-gitchat-operation-v1` digest domain. Do not rename
+strings, the `refs/p13i/gitchat/claims/` ref prefix, and the
+`p13i-gitchat-operation-v1` digest domain. Do not rename
 them in passing.
 
 `gitchat@p13i` is different. It is the author and committer
-address the scripts stamp on the outbox and claim commits they create,
-and `p13i gitchat operation claim` is the first line of a
-claim commit's message. No script reads either. Both are
-kept from the origin by the owner's decision, so commits
-your install pushes to your remote carry them.
+address the scripts stamp on the outbox and claim commits
+they create, and `p13i gitchat operation claim` is the first
+line of a claim commit's message. No script reads either.
+Both are kept from the origin by the owner's decision, so
+commits your install pushes to your remote carry them.
 
 The top-level `skill` is a symlink to `skills/gitchat/`. Do
 not reverse that orientation.

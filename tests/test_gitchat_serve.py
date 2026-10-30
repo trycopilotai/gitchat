@@ -157,9 +157,7 @@ def test_identified_prompt_accepts_legacy_terminal_before_cutover(channel_id):
         },
     )
 
-    assert poll.answered_prompt_ids(args, [inbound, completed]) == {
-        "prompt-1"
-    }
+    assert poll.answered_prompt_ids(args, [inbound, completed]) == {"prompt-1"}
 
 
 def test_identified_prompt_rejects_legacy_terminal_after_strict_cutover():
@@ -234,9 +232,7 @@ def test_identified_prompt_accepts_same_second_legacy_terminal():
         },
     )
 
-    assert poll.answered_prompt_ids(args, [inbound, completed]) == {
-        inbound["id"]
-    }
+    assert poll.answered_prompt_ids(args, [inbound, completed]) == {inbound["id"]}
 
 
 @pytest.mark.parametrize(
@@ -268,9 +264,7 @@ def test_poll_binds_envelope_sender_to_outbox(
 
     monkeypatch.setattr(poll, "git", fake_git)
 
-    assert len(poll.all_envelopes("/repo", "origin", ".agents")) == (
-        expected_count
-    )
+    assert len(poll.all_envelopes("/repo", "origin", ".agents")) == (expected_count)
 
 
 @pytest.mark.parametrize(
@@ -422,8 +416,7 @@ def test_poll_fetch_authenticates_and_prunes(monkeypatch):
             "-q",
             "--prune",
             tokenized,
-            "+refs/heads/gitchat/*-outbox:"
-            "refs/remotes/origin/gitchat/*-outbox",
+            "+refs/heads/gitchat/*-outbox:" "refs/remotes/origin/gitchat/*-outbox",
         ]
     ]
 
@@ -916,10 +909,7 @@ def test_mark_seen_forwards_message_directory(monkeypatch):
     monkeypatch.setattr(
         serve,
         "run",
-        lambda command: (
-            calls.append(command)
-            or SimpleNamespace(returncode=0)
-        ),
+        lambda command: (calls.append(command) or SimpleNamespace(returncode=0)),
     )
 
     serve.mark_seen(arguments, "prompt-1")
@@ -1000,7 +990,16 @@ def test_serve_once_returns_failure_when_terminal_send_fails(monkeypatch):
 @pytest.mark.parametrize(
     "arguments",
     (
-        ("--kind", "response", "--reply-to", "p", "--conversation-id", "c", "--hops", "1"),
+        (
+            "--kind",
+            "response",
+            "--reply-to",
+            "p",
+            "--conversation-id",
+            "c",
+            "--hops",
+            "1",
+        ),
         (
             "--kind",
             "response",
@@ -1011,10 +1010,37 @@ def test_serve_once_returns_failure_when_terminal_send_fails(monkeypatch):
             "--max-responses",
             "1",
         ),
-        ("--kind", "response", "--reply-to", "p", "--conversation-id", "c", "--seq", "1"),
+        (
+            "--kind",
+            "response",
+            "--reply-to",
+            "p",
+            "--conversation-id",
+            "c",
+            "--seq",
+            "1",
+        ),
         ("--kind", "response", "--reply-to", "p", "--conversation-id", "c", "--stream"),
-        ("--kind", "response", "--reply-to", "p", "--conversation-id", "c", "--tier", "max"),
-        ("--kind", "progress", "--reply-to", "p", "--conversation-id", "c", "--seq", "0"),
+        (
+            "--kind",
+            "response",
+            "--reply-to",
+            "p",
+            "--conversation-id",
+            "c",
+            "--tier",
+            "max",
+        ),
+        (
+            "--kind",
+            "progress",
+            "--reply-to",
+            "p",
+            "--conversation-id",
+            "c",
+            "--seq",
+            "0",
+        ),
         ("--hops", "2"),
         ("--reply-to", "p"),
         ("--conversation-id", "c"),
@@ -1150,9 +1176,7 @@ def test_send_does_not_suppress_distinct_operation_identity(monkeypatch):
             return SimpleNamespace(
                 returncode=0,
                 stderr="",
-                stdout=(
-                    ".agents/gitchat/messages/terminal.gpt.json\n"
-                ),
+                stdout=(".agents/gitchat/messages/terminal.gpt.json\n"),
             )
         if git_arguments[0] == "show":
             return SimpleNamespace(
@@ -1239,7 +1263,9 @@ def test_send_eight_concurrent_terminals_leave_a_published_reply(tmp_path):
     codes = [process.returncode for process in processes]
     assert set(codes) <= {0, 1}, codes
     payloads = [
-        json.loads(stdout) for (stdout, stderr), code in zip(results, codes) if code == 0
+        json.loads(stdout)
+        for (stdout, stderr), code in zip(results, codes)
+        if code == 0
     ]
     assert sum(payload["published"] for payload in payloads) >= 1
     listing = subprocess.run(
@@ -1701,9 +1727,7 @@ def test_send_keeps_ordinary_terminal_after_stream_terminal(tmp_path, capsys):
         '"agent":[]}',
     ),
 )
-def test_send_skips_unrelated_malformed_outbox_envelope(
-    tmp_path, capsys, malformed
-):
+def test_send_skips_unrelated_malformed_outbox_envelope(tmp_path, capsys, malformed):
     send = load_script("gitchat_send.py")
     remote = tmp_path / "remote.git"
     client = tmp_path / "client"

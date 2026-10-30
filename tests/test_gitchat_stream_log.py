@@ -5,6 +5,7 @@ via importlib rather than a normal import. The streaming loop takes
 injected now/sleep/alive/send deps, so the loop is driven here with
 those four replaced.
 """
+
 import importlib.util
 import os
 import types
@@ -170,9 +171,7 @@ def test_session_alive_missing_tmux(monkeypatch):
 
 
 def test_tmux_available(monkeypatch):
-    monkeypatch.setattr(
-        mod.subprocess, "run", lambda *a, **k: types.SimpleNamespace()
-    )
+    monkeypatch.setattr(mod.subprocess, "run", lambda *a, **k: types.SimpleNamespace())
     assert mod.tmux_available() is True
 
     def boom(*a, **k):
@@ -363,9 +362,7 @@ def test_run_stream_coalesces_and_seq_is_monotonic(tmp_path):
         with open(p, "a") as fh:
             fh.write("L%d\n" % counter["n"])
 
-    args = make_args(
-        tmp_path, from_start=True, interval=5.0, heartbeat=1e9, poll=1.0
-    )
+    args = make_args(tmp_path, from_start=True, interval=5.0, heartbeat=1e9, poll=1.0)
     result = mod.run_stream(
         args,
         now=clock,
@@ -388,9 +385,7 @@ def test_run_stream_heartbeat_reports_elapsed(tmp_path):
     def sleep(_):
         clock.advance(1.0)
 
-    args = make_args(
-        tmp_path, from_start=False, interval=1e9, heartbeat=10.0, poll=1.0
-    )
+    args = make_args(tmp_path, from_start=False, interval=1e9, heartbeat=10.0, poll=1.0)
     mod.run_stream(
         args,
         now=clock,
@@ -480,9 +475,7 @@ def test_run_stream_heartbeat_continues_past_content_budget(tmp_path):
     def sleep(_):
         clock.advance(1.0)
 
-    args = make_args(
-        tmp_path, max_updates=1, interval=0.0, heartbeat=0.0, poll=1.0
-    )
+    args = make_args(tmp_path, max_updates=1, interval=0.0, heartbeat=0.0, poll=1.0)
     result = mod.run_stream(
         args,
         now=clock,
@@ -513,12 +506,8 @@ def test_run_stream_heartbeat_send_failure_does_not_advance(tmp_path):
     def sleep(_):
         clock.advance(1.0)
 
-    args = make_args(
-        tmp_path, from_start=False, interval=1e9, heartbeat=0.0, poll=1.0
-    )
-    mod.run_stream(
-        args, now=clock, sleep=sleep, alive=lambda: clock.t < 3.0, send=send
-    )
+    args = make_args(tmp_path, from_start=False, interval=1e9, heartbeat=0.0, poll=1.0)
+    mod.run_stream(args, now=clock, sleep=sleep, alive=lambda: clock.t < 3.0, send=send)
     beats = [c for c in calls if c["kind"] == "progress"]
     # failed attempt reused seq 1, then successful sends advance 1,2
     assert [c["seq"] for c in beats] == [1, 1, 2]
@@ -534,9 +523,7 @@ def test_run_stream_respects_protocol_cap(monkeypatch, tmp_path):
     def sleep(_):
         clock.advance(1.0)
 
-    args = make_args(
-        tmp_path, from_start=False, interval=1e9, heartbeat=0.0, poll=1.0
-    )
+    args = make_args(tmp_path, from_start=False, interval=1e9, heartbeat=0.0, poll=1.0)
     result = mod.run_stream(
         args,
         now=clock,

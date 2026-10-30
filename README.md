@@ -22,11 +22,10 @@ A poll stops returning a prompt once it is answered.
 
 The demo is reconstructed from
 [`evidence/transcripts/send-poll-session.txt`](evidence/transcripts/send-poll-session.txt),
-a captured run of `gitchat_send.py` and `gitchat_poll.py`
-in two throwaway repositories that share a local bare
-remote. The demo leaves out the JSON line each send prints
-and every line of the polled envelope except `kind` and
-`msg`.
+a captured run of `gitchat_send.py` and `gitchat_poll.py` in
+two throwaway repositories that share a local bare remote.
+The demo leaves out the JSON line each send prints and every
+line of the polled envelope except `kind` and `msg`.
 
 **Read this before you serve.** A gitchat server runs what
 it is sent.
@@ -58,8 +57,8 @@ limits.
   exercised only by the test suite, where a worker is a stub
   or a `sleep` or `echo` command. `gitchat_pick_worker.py`,
   `gitchat_tail.py` and the systemd unit have no tests here.
-- No run against a network remote, across two hosts, or
-  with `GITHUB_TOKEN` set was recorded.
+- No run against a network remote, across two hosts, or with
+  `GITHUB_TOKEN` set was recorded.
 - Whether an agent that follows `SKILL.md` keeps to its
   cycle and fanout rules has not been measured.
 - The scripts are carried over from a private deployment
@@ -83,8 +82,8 @@ limits.
   and
   [`skills/gitchat/references/running-indefinitely.md`](skills/gitchat/references/running-indefinitely.md)
   are four sections of the protocol kept out of `SKILL.md`
-  for length. `SKILL.md` repeats the four security statements
-  above, so they travel with an installed copy.
+  for length. `SKILL.md` repeats the four security
+  statements above, so they travel with an installed copy.
 - Under [`skills/gitchat/scripts/`](skills/gitchat/scripts):
   - `gitchat_send.py` publishes one envelope. It skips a
     terminal reply when its sender's outbox already holds a
@@ -106,10 +105,11 @@ limits.
   - `gitchat_stream_log.py` publishes the tail of a growing
     log file as progress messages.
   - `gitchat_channel.py` checks a committed channel manifest
-    against the remote's URL. The send, poll, tail, serve and
-    log scripts load it.
+    against the remote's URL. The send, poll, tail, serve
+    and log scripts load it.
 - [`skills/gitchat/systemd/gitchat-serve@.service`](skills/gitchat/systemd/gitchat-serve@.service)
-  is a systemd user unit that runs `gitchat_serve_forever.sh`.
+  is a systemd user unit that runs
+  `gitchat_serve_forever.sh`.
 
 The scripts need `python3` and `git`. Publishing the first
 message on a new outbox branch uses
@@ -118,10 +118,10 @@ The tests were run on Python 3.9, 3.11 and 3.13 on macOS;
 nothing here was run on Windows.
 
 By default the scripts keep envelopes under
-`.agents/gitchat/messages/` on the outbox branches and
-local state under `.agents/gitchat/state/` in the working
-tree. `--message-dir` and `--state-dir` change both; the
-recorded session uses `messages/` and `state/`.
+`.agents/gitchat/messages/` on the outbox branches and local
+state under `.agents/gitchat/state/` in the working tree.
+`--message-dir` and `--state-dir` change both; the recorded
+session uses `messages/` and `state/`.
 
 ## Not included
 
@@ -130,19 +130,18 @@ recorded session uses `messages/` and `state/`.
   wrapper. None ships here.
 - **A usage command.** `gitchat_pick_worker.py` and
   `gitchat_serve_forever.sh` default to
-  `make -s usage ARGS=--json` to read remaining capacity.
-  No such make target ships. When that command fails,
-  prints nothing, prints something that is not JSON, prints
-  a JSON object without a `panels` list, or leaves no
-  provider with a panel, a numeric `percent` and a value
-  under the threshold, the worker falls back to
-  `--default-provider` and says so on standard error.
-  Usage JSON of another unexpected shape is not validated
-  and can make the worker exit with a traceback. That
-  includes `NaN` and `Infinity`, which Python's decoder
-  accepts: printed alone they raise, and a `NaN` percent is
-  not rejected, so a provider over the threshold can then be
-  chosen.
+  `make -s usage ARGS=--json` to read remaining capacity. No
+  such make target ships. When that command fails, prints
+  nothing, prints something that is not JSON, prints a JSON
+  object without a `panels` list, or leaves no provider with
+  a panel, a numeric `percent` and a value under the
+  threshold, the worker falls back to `--default-provider`
+  and says so on standard error. Usage JSON of another
+  unexpected shape is not validated and can make the worker
+  exit with a traceback. That includes `NaN` and `Infinity`,
+  which Python's decoder accepts: printed alone they raise,
+  and a `NaN` percent is not rejected, so a provider over
+  the threshold can then be chosen.
 - **The agent command lines.** The default worker templates
   fetch `@openai/codex` and `@anthropic-ai/claude-code`
   through `npx` when they run, and name model ids that your
@@ -305,14 +304,13 @@ resolved path of its throwaway directory and the value of
 `socket.gethostname()`, and writes nothing if it finds
 either. It makes no other check; the packaging test
 separately rejects `/var/folders`, `/tmp`, `/Users` and
-`/home` in the transcript.
-`evidence/demo-manifest.json` records the shell functions
-and commands, the interpreter, the git version, the date
-(local time, while the ids in the transcript are UTC),
-and the SHA-256 of `SKILL.md`, of the three programs the
-session ran, and of the transcript. The ids, timestamps and
-nonces in the transcript are as recorded and differ on every
-recording.
+`/home` in the transcript. `evidence/demo-manifest.json`
+records the shell functions and commands, the interpreter,
+the git version, the date (local time, while the ids in the
+transcript are UTC), and the SHA-256 of `SKILL.md`, of the
+three programs the session ran, and of the transcript. The
+ids, timestamps and nonces in the transcript are as recorded
+and differ on every recording.
 
 ### Agent invocations
 
